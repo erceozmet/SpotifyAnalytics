@@ -6,7 +6,7 @@ const app = express();
 
 app.use(cors);
 app.use(json());
-app.use("/api/v1/user", route);
+app.use("/api/v1/route", route);
 app.use("*", (req, res) => res.status(404).json({ error: "page not found"}))
 
 
