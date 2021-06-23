@@ -1,27 +1,22 @@
 {
-  "name": "backendserver",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "Backend server for SpotifyAnalytics application",
+  "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/erceozmet/SpotifyAnalytics.git"
-  },
-  "author": "Erce Ozmetin",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/erceozmet/SpotifyAnalytics/issues"
-  },
-  "homepage": "https://github.com/erceozmet/SpotifyAnalytics#readme",
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "bson": "^4.2.2",
     "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongodb": "^3.6.9",
-    "mongoose": "^5.12.14"
+    "mongodb": "^3.6.4",
+    "node-fetch": "^2.6.1"
   }
 }
