@@ -9,13 +9,13 @@ export default class ReviewsDAO {
       return
     }
     try {
-      reviews = await conn.db(process.env.RESTREVIEWS_NS).collection("reviews")
+      reviews = await conn.db(process.env.SPOTIFYANALYTICS_NS).collection("tracks")
     } catch (e) {
       console.error(`Unable to establish collection handles in userDAO: ${e}`)
     }
   }
 
-  static async addReview(restaurantId, user, review, date) {
+  static async addReview(trackId, user, review, date) {
     try {
       const reviewDoc = { name: user.name,
           user_id: user._id,
