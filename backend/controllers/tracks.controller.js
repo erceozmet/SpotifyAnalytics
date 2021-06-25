@@ -1,34 +1,63 @@
 import tracksDAO from "../dao/tracksDAO.js"
-
+import request from "request"
+import querystring from "querystring"
 export default class tracksController {
   static async apiGettracks(req, res, next) {
-    const tracksPerPage = req.query.tracksPerPage ? parseInt(req.query.tracksPerPage, 10) : 20
-    const page = req.query.page ? parseInt(req.query.page, 10) : 0
+    try{
+      var access_token = req.query.access_token || null;
+      var refresh_token = req.query.refresh_token || null;
+  
+      if (access_token === null || refresh_token === null){
+        res.redirect('/#' +
+          querystring.stringify({
+          error: 'token failed to retrieve'
+        }));
+      }
+   
+      var options = {
+        url: 'https://api.spotify.com/v1/me/top/tracks?limit=50',
+        headers: { 'Authorization': 'Bearer ' + access_token },
+        json: true
+      };
+  
+      request.get(options, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+          let items = body.items
+          console.log(items);
 
-    let filters = {}
-    if (req.query.cuisine) {
-      filters.cuisine = req.query.cuisine
-    } else if (req.query.zipcode) {
-      filters.zipcode = req.query.zipcode
-    } else if (req.query.name) {
-      filters.name = req.query.name
+          res.send(items)
+        }
+        else{
+          res.redirect('/#' +
+          querystring.stringify({
+            error: `failed to retrieve top tracks, status code: ${response.statusCode}$`
+        }));
+        }
+      });
+      
+
+      return
+
+    } catch(e){
+      console.log(`api, ${e}`)
+      res.status(500).json({ error: e })
     }
+  
 
-    const { tracksList, totalNumtracks } = await tracksDAO.gettracks({
-      filters,
-      page,
-      tracksPerPage,
-    })
+    // const { tracksList, totalNumtracks } = await tracksDAO.gettracks({
+    //   filters,
+    //   page,
+    //   tracksPerPage,
+    // })
 
-    let response = {
-      tracks: tracksList,
-      page: page,
-      filters: filters,
-      entries_per_page: tracksPerPage,
-      total_results: totalNumtracks,
+    // let response = {
+    //   tracks: tracksList,
+    //   page: page,
+    //   filters: filters,
+    //   entries_per_page: tracksPerPage,
+    //   total_results: totalNumtracks,
+    // }
     }
-    res.json(response)
-  }
   static async apiGettrackById(req, res, next) {
     try {
       let id = req.params.id || {}

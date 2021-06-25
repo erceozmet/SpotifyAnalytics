@@ -29,19 +29,19 @@ var stateKey = 'spotify_auth_state';
 
 app.get('/login', function(req, res) {
 
-var state = generateRandomString(16);
-res.cookie(stateKey, state);
+    var state = generateRandomString(16);
+    res.cookie(stateKey, state);
 
-// your application requests authorization
-var scope = 'user-read-private user-read-email';
-res.redirect('https://accounts.spotify.com/authorize?' +
-    querystring.stringify({
-    response_type: 'code',
-    client_id: process.env.SPOTIFYCLIENTID,
-    scope: scope,
-    redirect_uri: redirect_uri,
-    state: state
-    }));
+    // your application requests authorization
+    var scope = 'user-read-private user-read-email user-top-read';
+    res.redirect('https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+        response_type: 'code',
+        client_id: process.env.SPOTIFYCLIENTID,
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state: state
+        }));
 });
 
 app.get('/callback', function(req, res) {
@@ -79,23 +79,13 @@ if (state === null || state !== storedState) {
         var access_token = body.access_token,
             refresh_token = body.refresh_token;
 
-        var options = {
-        url: 'https://api.spotify.com/v1/me',
-        headers: { 'Authorization': 'Bearer ' + access_token },
-        json: true
-        };
-
-        // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
-        console.log(body);
-        });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect('http://localhost:5000/spotifyanalytics'  
-        // querystring.stringify({
-        //     access_token: access_token,
-        //     refresh_token: refresh_token
-        // })
+        res.redirect('http://localhost:5000/spotifyanalytics?' +
+        querystring.stringify({
+            access_token: access_token,
+            refresh_token: refresh_token
+        })
         );
     } else {
         res.redirect('/error' +
