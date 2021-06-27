@@ -23,9 +23,20 @@ export default class tracksController {
       request.get(options, function(error, response, body) {
         if (!error && response.statusCode === 200) {
           let items = body.items
-          console.log(items);
+          
+          // let filtereditems = [];
+          // for (let i in items){
+          //   console.log(items[i])
+          //   filtereditems.push(items[i])
+          // }
+          // res.send(filtereditems)
 
-          res.send(items)
+          tracksDAO.insertTracks(items)
+          let inserted = "Inserted songs: "
+          items.forEach(element => {
+            inserted += element.name + "\n"
+          });
+          res.send(inserted)
         }
         else{
           res.redirect('/#' +
