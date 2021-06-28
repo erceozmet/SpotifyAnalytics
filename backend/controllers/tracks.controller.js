@@ -1,6 +1,8 @@
 import tracksDAO from "../dao/tracksDAO.js"
 import request from "request"
 import querystring from "querystring"
+import cookieParser from "cookie-parser";
+
 export default class tracksController {
   static async apiGettracks(req, res, next) {
     try{
@@ -13,6 +15,23 @@ export default class tracksController {
           error: 'token failed to retrieve'
         }));
       }
+      var UserOptions = {
+        url: 'https://api.spotify.com/v1/me',
+        headers: { 'Authorization': 'Bearer ' + access_token },
+        json: true
+        };
+
+        request.get(UserOptions, function(error, response, body){
+        if (!error && response.statusCode === 200) {
+            res.cookie('currentUserId', body.id);
+        }
+        else{
+            res.redirect('/#' +
+            querystring.stringify({
+            error: `failed to retrieve user profile details: ${response.statusCode}$`
+        }));
+        }
+      })
    
       var options = {
         url: 'https://api.spotify.com/v1/me/top/tracks?limit=50',
@@ -24,12 +43,6 @@ export default class tracksController {
         if (!error && response.statusCode === 200) {
           let items = body.items
           
-          // let filtereditems = [];
-          // for (let i in items){
-          //   console.log(items[i])
-          //   filtereditems.push(items[i])
-          // }
-          // res.send(filtereditems)
 
           tracksDAO.insertTracks(items)
           let inserted = "Inserted songs: "
@@ -68,7 +81,38 @@ export default class tracksController {
     //   entries_per_page: tracksPerPage,
     //   total_results: totalNumtracks,
     // }
+  }
+
+  static async createPlaylist(req, res, next){
+    try{
+      var userId = req.cookies ? req.cookies['currentUserId'] : null;
+      if (userId != null){
+        var options = {
+          url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
+          headers: { 'Authorization': 'Bearer ' + access_token },
+          json: true
+        };
+
+        request.post(options, function(error, response, body){
+          if (!error && response.statusCode === 200) {
+            console.log("playlist created")
+            res.redirect(body.href)
+          }
+          else{
+            res.redirect('/#' +
+            querystring.stringify({
+              error: `failed to create playlist: ${response.statusCode}$`
+            }));
+          }
+        })
+      }
     }
+    catch(e){
+      console.log(`createPlaylist, ${e}`)
+      res.status(500).json({ error: e })
+    }
+  }
+  
   static async apiGettrackById(req, res, next) {
     try {
       let id = req.params.id || {}

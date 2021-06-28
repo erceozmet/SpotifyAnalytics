@@ -17,70 +17,32 @@ export default class tracksDAO {
     }
   }
 
-    static async insertTracks(items){
-      let inserted_song_names = []
-      for (let i in items){
-        var count = 0;
-        items[i]._id = items[i].id
-        delete items[i].id
-
-        tracks.find({_id: items[i]._id}, {_id : 1}).toArray(function (err, result) {
-          if (err) throw err;
-          if (result.length == 0){
-            inserted_song_names.push(items[i].name)
-            tracks.insertOne(items[i], (err, res) => {
-              if (err) throw err; 
-            })
-          }
-          else{
-            console.log(items[i].name + " is already in db, skipping...\n")
-          }
-        })
-      }
-      console.log("insertions successful")
-      return inserted_song_names; 
-    }
-  
-  static async gettracks({
-    filters = null,
-    page = 0,
-    tracksPerPage = 20,
-  } = {}) {
-    let query
-    if (filters) {
-      if ("name" in filters) {
-        query = { $text: { $search: filters["name"] } }
-      } else if ("track" in filters) {
-        query = { "track": { $eq: filters["track"] } }
-      } else if ("zipcode" in filters) {
-        query = { "address.zipcode": { $eq: filters["zipcode"] } }
-      }
-    }
-
-    let cursor
+  static async insertTracks(items){
+    let inserted_song_names = []
+    for (let i in items){
     
-    try {
-      cursor = await tracks
-        .find(query)
-    } catch (e) {
-      console.error(`Unable to issue find command, ${e}`)
-      return { tracksList: [], totalNumtracks: 0 }
+      items[i]._id = items[i].id
+      delete items[i].id
+
+      tracks.find({_id: items[i]._id}, {_id : 1}).toArray(function (err, result) {
+        if (err) throw err;
+        if (result.length == 0){
+          inserted_song_names.push(items[i].name)
+          tracks.insertOne(items[i], (err, res) => {
+            if (err) throw err; 
+          })
+        }
+        else{
+          console.log(items[i].name + " is already in db, skipping...\n")
+        }
+      })
     }
-
-    const displayCursor = cursor.limit(tracksPerPage).skip(tracksPerPage * page)
-
-    try {
-      const tracksList = await displayCursor.toArray()
-      const totalNumtracks = await tracks.countDocuments(query)
-
-      return { tracksList, totalNumtracks }
-    } catch (e) {
-      console.error(
-        `Unable to convert cursor to array or problem counting documents, ${e}`,
-      )
-      return { tracksList: [], totalNumtracks: 0 }
-    }
+    console.log("insertions successful")
   }
+  
+  // static async gettracks(){
+
+  // }
   static async getTrackByID(id) {
     try {
       const pipeline = [

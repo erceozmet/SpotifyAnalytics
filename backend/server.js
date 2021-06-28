@@ -6,6 +6,7 @@ import fetch from "node-fetch"
 import request from "request"
 import querystring from "querystring"
 
+
 var redirect_uri = 'http://localhost:5000/callback'
 const app = express()
 
@@ -77,9 +78,9 @@ if (state === null || state !== storedState) {
     if (!error && response.statusCode === 200) {
 
         var access_token = body.access_token,
-            refresh_token = body.refresh_token;
-
-
+            refresh_token = body.refresh_token
+      
+       
         // we can also pass the token to the browser to make requests from there
         res.redirect('http://localhost:5000/spotifyanalytics?' +
         querystring.stringify({
