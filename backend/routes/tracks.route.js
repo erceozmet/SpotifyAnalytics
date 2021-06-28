@@ -7,18 +7,13 @@ import ReviewsCtrl from "../controllers/reviews.controller.js"
 const router = express.Router()
 
 router.route("/").get(tracksCtrl.apiGettracks)
-
+router.route("create-playlist-from-db").post(tracksCtrl.createPlaylist)
 router.route("*").get((req, res) => res.status(404).json({ error: "page not found"}))
 
 
 router.route("/id/:id").get(tracksCtrl.apiGettrackById)
 router.route("/cuisines").get(tracksCtrl.apiGettrackCuisines)
 
-router
-  .route("/review")
-  .post(ReviewsCtrl.apiPostReview)
-  .put(ReviewsCtrl.apiUpdateReview)
-  .delete(ReviewsCtrl.apiDeleteReview)
 
 
 export default router

@@ -18,7 +18,7 @@ export default class tracksDAO {
   }
 
     static async insertTracks(items){
-      console.log(items)
+      let inserted_song_names = []
       for (let i in items){
         var count = 0;
         items[i]._id = items[i].id
@@ -26,16 +26,19 @@ export default class tracksDAO {
 
         tracks.find({_id: items[i]._id}, {_id : 1}).toArray(function (err, result) {
           if (err) throw err;
-          
           if (result.length == 0){
+            inserted_song_names.push(items[i].name)
             tracks.insertOne(items[i], (err, res) => {
               if (err) throw err; 
-              
             })
+          }
+          else{
+            console.log(items[i].name + " is already in db, skipping...\n")
           }
         })
       }
       console.log("insertions successful")
+      return inserted_song_names; 
     }
   
   static async gettracks({
