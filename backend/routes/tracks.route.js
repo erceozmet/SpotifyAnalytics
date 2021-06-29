@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.route("/").get(tracksCtrl.apiGettracks)
 
-router.route("/create-playlist-from-db").post(tracksCtrl.createPlaylist)
+router.route("/create-playlist").post(tracksCtrl.createPlaylist)
 router.route("*").get((req, res) => res.status(404).json({ error: "page not found"}))
 
 

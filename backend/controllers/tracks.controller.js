@@ -15,24 +15,7 @@ export default class tracksController {
           error: 'token failed to retrieve'
         }));
       }
-      var UserOptions = {
-        url: 'https://api.spotify.com/v1/me',
-        headers: { 'Authorization': 'Bearer ' + access_token },
-        json: true
-        };
-
-        request.get(UserOptions, function(error, response, body){
-        if (!error && response.statusCode === 200) {
-            res.cookie('currentUserId', body.id);
-        }
-        else{
-            res.redirect('/#' +
-            querystring.stringify({
-            error: `failed to retrieve user profile details: ${response.statusCode}$`
-        }));
-        }
-      })
-   
+     
       var options = {
         url: 'https://api.spotify.com/v1/me/top/tracks?limit=50',
         headers: { 'Authorization': 'Bearer ' + access_token },
@@ -83,35 +66,46 @@ export default class tracksController {
     // }
   }
 
+  
   static async createPlaylist(req, res, next){
-    try{
-      var userId = req.cookies ? req.cookies['currentUserId'] : null;
-      if (userId != null){
-        var options = {
-          url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
-          headers: { 'Authorization': 'Bearer ' + access_token },
-          json: true
-        };
 
-        request.post(options, function(error, response, body){
-          if (!error && response.statusCode === 200) {
-            console.log("playlist created")
-            res.redirect(body.href)
-          }
-          else{
-            res.redirect('/#' +
-            querystring.stringify({
-              error: `failed to create playlist: ${response.statusCode}$`
-            }));
-          }
-        })
-      }
+    
+    var userId = req.cookies ? req.cookies['currentUserId'] : null;
+    var access_token = req.cookies ? req.cookies['acc_token'] : null;
+    if (userId != null && acc_token != null){
+      var options = {
+        url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
+        headers: { 'Authorization': 'Bearer ' + access_token },
+        body: {
+          "name": "Favoruite Songs",
+          "description": "Most listened songs by you and your friends",
+          "public": true
+        },
+        json: true
+      };
+
+      request.post(options, function(error, response, body){
+        if (!error && response.statusCode === 200) {
+          console.log("playlist created")
+          res.redirect(body.href)
+        }
+        else{
+          res.redirect('/#' +
+          querystring.stringify({
+            error: `failed to create playlist: ${response.statusCode}$`
+          }));
+        }
+      })
     }
-    catch(e){
-      console.log(`createPlaylist, ${e}`)
-      res.status(500).json({ error: e })
+    else{
+      res.redirect('/#' +
+      querystring.stringify({
+        error: `failed to access token, status code: ${response.statusCode}$`
+      }));
     }
-  }
+}
+    
+    
   
   static async apiGettrackById(req, res, next) {
     try {

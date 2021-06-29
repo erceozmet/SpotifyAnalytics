@@ -8,6 +8,7 @@ import querystring from "querystring"
 
 
 var redirect_uri = 'http://localhost:5000/callback'
+var redirect_uri_playlist = 'http://localhost:5000/playback'
 const app = express()
 
 app.use(cors())
@@ -34,7 +35,7 @@ app.get('/login', function(req, res) {
     res.cookie(stateKey, state);
 
     // your application requests authorization
-    var scope = 'user-read-private user-read-email user-top-read';
+    var scope = 'user-read-private user-read-email user-top-read playlist-modify-public playlist-modify-private';
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
         response_type: 'code',
@@ -79,7 +80,7 @@ if (state === null || state !== storedState) {
 
         var access_token = body.access_token,
             refresh_token = body.refresh_token
-      
+           
        
         // we can also pass the token to the browser to make requests from there
         res.redirect('http://localhost:5000/spotifyanalytics?' +
@@ -122,9 +123,102 @@ request.post(authOptions, function(error, response, body) {
 });
 });
 
+
+
+app.get('/create', function(req, res) {
+
+    var state = generateRandomString(16);
+    res.cookie(stateKey, state);
+
+    // your application requests authorization
+    var scope = 'user-read-private user-read-email user-top-read playlist-modify-public playlist-modify-private';
+    res.redirect('https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+        response_type: 'code',
+        client_id: process.env.SPOTIFYCLIENTID,
+        scope: scope,
+        redirect_uri: redirect_uri_playlist,
+        state: state
+        }));
+});
+
+app.get('/playback', function(req, res) {
+
+// your application requests refresh and access tokens
+// after checking the state parameter
+
+var code = req.query.code || null;
+var state = req.query.state || null;
+var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+if (state === null || state !== storedState) {
+    res.redirect('/#' +
+    querystring.stringify({
+        error: 'state_mismatch'
+    }));
+} else {
+    res.clearCookie(stateKey);
+    var authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    form: {
+        code: code,
+        redirect_uri: redirect_uri_playlist,
+        grant_type: 'authorization_code'
+    },
+    headers: {
+        'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFYCLIENTID + ':' + process.env.SPOTIFYCLIENTSECRET).toString('base64'))
+    },
+    json: true
+    };
+
+    request.post(authOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+
+        var access_token = body.access_token,
+            refresh_token = body.refresh_token
+        
+      
+       
+        // we can also pass the token to the browser to make requests from there
+        console.log("all good until here")
+        res.redirect('http://localhost:5000/spotifyanalytics/create-playlist?' +
+        querystring.stringify({
+            access_token: access_token,
+            refresh_token: refresh_token
+        })
+        );
+    } else {
+        res.redirect('/error' +
+        querystring.stringify({
+            error: 'invalid_token'
+        }));
+    }
+    });
+}
+});
+
+
+
 app.use("*", (req, res) => res.status(404).json({ error: "page not found"}))
 
-
-
-
 export default app;
+
+// var UserOptions = {
+//     url: 'https://api.spotify.com/v1/me',
+//     headers: { 'Authorization': 'Bearer ' + access_token },
+//     json: true
+//     };
+
+// request.get(UserOptions, function(error, response, body){
+// if (!error && response.statusCode === 200) {
+//     res.cookie('currentUserId', body.id);
+//     res.cookie('acc_token', access_token)
+// }
+// else{
+//     res.redirect('/#' +
+//     querystring.stringify({
+//     error: `failed to retrieve user profile details: ${response.statusCode}$`
+// }));
+// }
+// })
+   
