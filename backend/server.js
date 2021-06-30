@@ -83,7 +83,7 @@ if (state === null || state !== storedState) {
            
        
         // we can also pass the token to the browser to make requests from there
-        res.redirect('http://localhost:5000/spotifyanalytics?' +
+        res.redirect('http://localhost:5000/spotifyanalytics/sikko?' +
         querystring.stringify({
             access_token: access_token,
             refresh_token: refresh_token
@@ -131,7 +131,7 @@ app.get('/create', function(req, res) {
     res.cookie(stateKey, state);
 
     // your application requests authorization
-    var scope = 'user-read-private user-read-email user-top-read playlist-modify-public playlist-modify-private';
+    var scope = 'user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public';
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
         response_type: 'code',
@@ -180,8 +180,8 @@ if (state === null || state !== storedState) {
       
        
         // we can also pass the token to the browser to make requests from there
-        console.log("all good until here")
-        res.redirect('http://localhost:5000/spotifyanalytics/create-playlist?' +
+    
+        res.redirect('http://localhost:5000/spotifyanalytics/createplaylist?' +
         querystring.stringify({
             access_token: access_token,
             refresh_token: refresh_token

@@ -2,6 +2,7 @@ import tracksDAO from "../dao/tracksDAO.js"
 import request from "request"
 import querystring from "querystring"
 import cookieParser from "cookie-parser";
+import app from "../server.js";
 
 export default class tracksController {
   static async apiGettracks(req, res, next) {
@@ -68,41 +69,55 @@ export default class tracksController {
 
   
   static async createPlaylist(req, res, next){
+   
+    try{
+       
 
-    
-    var userId = req.cookies ? req.cookies['currentUserId'] : null;
-    var access_token = req.cookies ? req.cookies['acc_token'] : null;
-    if (userId != null && acc_token != null){
-      var options = {
-        url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
-        headers: { 'Authorization': 'Bearer ' + access_token },
-        body: {
-          "name": "Favoruite Songs",
-          "description": "Most listened songs by you and your friends",
-          "public": true
-        },
-        json: true
-      };
+      var userId = req.cookies ? req.cookies['currentUserId'] : null;
+      var access_token = req.query.access_token || null;
+      var refresh_token = req.query.refresh_token || null;
+  
+      
+      if (userId != null && access_token != null){
+        var options = {
+          url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
+          headers: { 'Authorization': 'Bearer ' + access_token },
+          body: {
+            "name": "Top Songs of The Week",
+            "description": "Most listened songs by you and your friends",
+            "public": true
+          },
+          json: true
+        };
+  
+        request.post(options, function(error, response, body){
+          if (!error && response.statusCode === 201) {
+            console.log("playlist created")
+            res.redirect(body.href)
+          }
+          else{
+            res.redirect('/#' +
+            querystring.stringify({
+              error: `failed to create playlist: ${response.statusCode}$`
+            }));
+          }
+        })
+      }
+      else{
+        res.redirect('/#' +
+        querystring.stringify({
+          error: `failed to access token, status code: ${response.statusCode}$`
+        }));
+      }
 
-      request.post(options, function(error, response, body){
-        if (!error && response.statusCode === 200) {
-          console.log("playlist created")
-          res.redirect(body.href)
-        }
-        else{
-          res.redirect('/#' +
-          querystring.stringify({
-            error: `failed to create playlist: ${response.statusCode}$`
-          }));
-        }
-      })
+    }catch(e){
+      console.log(`api, ${e}`)
+      res.status(500).json({ error: e })
     }
-    else{
-      res.redirect('/#' +
-      querystring.stringify({
-        error: `failed to access token, status code: ${response.statusCode}$`
-      }));
-    }
+  
+ 
+
+
 }
     
     
