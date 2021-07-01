@@ -7,7 +7,7 @@ import ReviewsCtrl from "../controllers/reviews.controller.js"
 const router = express.Router()
 
 router.route("/sikko").get(tracksCtrl.apiGettracks)
-router.route("/createplaylist").get(tracksCtrl.createPlaylist)
+router.route("/createplaylist").post(tracksCtrl.createPlaylist)
 router.route("*").get((req, res) => res.status(404).json({ error: "page not found"}))
 
 
