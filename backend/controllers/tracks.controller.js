@@ -3,7 +3,6 @@ import request from "request"
 import querystring from "querystring"
 import cookieParser from "cookie-parser";
 import app from "../server.js";
-import { access } from "fs";
 
 export default class tracksController {
   static async apiGettracks(req, res, next) {
@@ -83,7 +82,7 @@ export default class tracksController {
       if (userId != null && access_token != null){
         var options = {
           url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
-          headers: { "Accept": "application/json", 'Authorization': 'Bearer ' + access_token },
+          headers: { 'Authorization': 'Bearer ' + access_token },
           body: {
             "name": "Top Songs of The Week",
             "description": "Most listened songs by you and your friends",
@@ -92,10 +91,10 @@ export default class tracksController {
           json: true
         };
   
+        
         request.post(options, function(error, response, body){
-          console.log(response.statusCode)
-          if (!error && response.statusCode === 201) {
-            
+
+          if (!error && response.statusCode === 200) {
             console.log("playlist created")
             res.redirect(body.href)
           }
