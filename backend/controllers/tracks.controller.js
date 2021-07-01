@@ -94,7 +94,7 @@ export default class tracksController {
         
         request.post(options, function(error, response, body){
 
-          if (!error && response.statusCode === 200) {
+          if (!error && response.statusCode === 201) {
             console.log("playlist created")
             res.redirect(body.href)
           }
@@ -117,8 +117,6 @@ export default class tracksController {
       console.log(`api, ${e}`)
       res.status(500).json({ error: e })
     }
-  
- 
 
 
 }
